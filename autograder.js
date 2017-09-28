@@ -121,7 +121,7 @@ inject = function(req, res) {
 // Returns whether or not the given request token and Slack team this request is coming from are ok
 function validRequest(token, team_id) {
 	var teamIds = JSON.parse(process.env.TEAM_IDS);
-	return token == process.env.TOKEN && teamIds.includes(team_id);
+	return token == process.env.VER_TOKEN && teamIds.includes(team_id);
 }
 
 // Checks whether the channel name contains both "106" and "assignment"

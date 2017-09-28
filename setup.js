@@ -187,7 +187,7 @@ function requestPromise(params) {
 // Returns whether the request token and Slack team are ok
 function validRequest(token, team_id) {
 	var teamIds = JSON.parse(process.env.TEAM_IDS);
-	return token == process.env.TOKEN && teamIds.includes(team_id);
+	return token == process.env.VER_TOKEN && teamIds.includes(team_id);
 }
 
 module.exports = {
