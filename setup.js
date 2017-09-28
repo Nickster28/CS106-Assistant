@@ -99,7 +99,7 @@ function sendResponseMessage(url, text) {
 
 function inviteUser(sunet, channels) {
 	url = "https://slack.com/api/users.admin.invite?token=" + process.env.TOKEN;
-	url += "&email=" + sunet;// + "@stanford.edu";
+	url += "&email=" + sunet + "@stanford.edu";
 	allChannels = channels.concat(JSON.parse(process.env.CHANNELS));
 	console.log("Inviting user " + sunet + " to " + allChannels);
 	url += "&channels=" + allChannels.join(",");
