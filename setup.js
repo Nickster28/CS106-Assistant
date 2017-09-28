@@ -24,12 +24,13 @@ var request = require('request');
  * -------------------
  */
 setup = function(req, res) {
-	res.status(200).send("Working on it...");
-	console.log("Received setup request.");
 	if (!validRequest(req.body.token, req.body.team_id)) {
 		console.log("Invalid token or team ID");
 		return res.status(400).send("Invalid token or team ID");
-	} else {		
+	} else {	
+		console.log("Received setup request.");	
+		res.status(200).send("Working on it...");
+		console.log("Working on it...");
 		var responseURL = req.body.response_url;
 
 		// Make a new empty promise
