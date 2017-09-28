@@ -151,7 +151,7 @@ function injectAutograder(channelName, sunet) {
 	var assignmentNumber = parseInt(channelName[assignmentNumberIndex]);
 
 	var credentials = JSON.parse(process.env.CREDENTIALS);
-	var classes = JSON.parse(process.env.CLASSES);
+	var classes = JSON.parse(process.env.GRADER_CLASSES);
 	if (!classes.includes(classLetter.toUpperCase())) {
 		return new Promise(function(resolve, reject) {
 			resolve("Error: unknown class CS106" + classLetter.toUpperCase());

@@ -101,7 +101,7 @@ function sendResponseMessage(url, text) {
 
 function inviteUser(sunet, channels) {
 	console.log("Inviting user " + sunet + " to " + channels);
-	url = "https://slack.com/api/users.admin.invite?token=" + process.env.AUTH_TOKEN;
+	url = "https://slack.com/api/users.admin.invite?token=" + process.env.TOKEN;
 	url += "&email=" + sunet + "@stanford.edu"
 	url += "&channels=" + channels.join(",")
 	return requestPromise({
@@ -149,7 +149,7 @@ the given name.  The promise also returns the Channel ID of the new channel.
 */
 function createChannel(name) {
 	return requestPromise({
-		url: "https://slack.com/api/channels.create?token=" + process.env.AUTH_TOKEN + "&name=" + name
+		url: "https://slack.com/api/channels.create?token=" + process.env.TOKEN + "&name=" + name
 	}).then(function(body) {
 		return JSON.parse(body).channel.id;
 	});
