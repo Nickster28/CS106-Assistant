@@ -19,7 +19,7 @@ app.get("/auth", function(req, res) {
 	res.status(200).end();
 });
 
-app.get("/test", function(req, res) {
+app.post("/test", function(req, res) {
 	console.log(req.body);
 	if (!validRequest(req.body.token, req.body.team_id)) {
 				console.log("Invalid token or team ID");
