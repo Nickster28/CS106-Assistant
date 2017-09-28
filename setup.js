@@ -193,18 +193,28 @@ var login = function(req, res) {
 	fs.readFile('./login.html', 'utf8', function(err, data) {
 		if (err) {
 			res.status(500).send(err);
+		} else {
+			res.status(200).send(data);
 		}
-		res.status(200).send(data);
-	})
+	});
 }
 
 var home = function(req, res) {
 	fs.readFile('./index.html', 'utf8', function(err, data) {
 		if (err) {
 		  res.status(500).send(err);
+		} else {
+			var url = "https://slack.com/api/oauth.access?client_id="
+			url += process.env.CLIENT_ID + "&client_secret=" + process.env.CLIENT_SECRET
+			url += "&code=" + req.query.code;
+			requestPromise({
+				url: url
+			}).then(function(body) {
+				res.status(200).send(data.replace("TOKEN_PLACEHOLDER", body.access_token));
+			}, function(error) {
+				res.status(500).send(error);
+			});
 		}
-		
-		res.status(200).send(data.replace("TOKEN_PLACEHOLDER", req.query.code));
 	});
 }
 
