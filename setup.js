@@ -191,7 +191,7 @@ function validRequest(token, team_id) {
 var login = function(req, res) {
 	fs.readFile('./login.html', 'utf8', function(err, data) {
 		if (err) {
-			return console.log(err);
+			res.status(500).send(err);
 		}
 		res.status(200).send(data);
 	})
@@ -201,7 +201,7 @@ var home = function(req, res) {
 	console.log(req.params.code);
 	fs.readFile('./index.html', 'utf8', function(err, data) {
 		if (err) {
-		  return console.log(err);
+		  res.status(500).send(err);
 		}
 		
 		res.status(200).send(data.replace("TOKEN_PLACEHOLDER", "Nick"));
