@@ -30,7 +30,6 @@ setup = function(req, res) {
 	} else {	
 		console.log("Received setup request.");	
 		res.status(200).send("Working on it...");
-		console.log("Working on it...");
 		var responseURL = req.body.response_url;
 
 		// Make a new empty promise
@@ -61,8 +60,7 @@ setup = function(req, res) {
 
 		// Invite each user to these channels
 		textElems.forEach(function(sunet) {
-			promise = promise.then(function(body) {
-				console.log(body);
+			promise = promise.then(function() {
 				return inviteUser(sunet, channelIds);
 			});
 		});
@@ -89,7 +87,6 @@ Returns: a promise that sends the given message back to Slack to the user.
 --------------------------------
 */
 function sendResponseMessage(url, text) {
-	console.log("Sending response POST to \"" + url + "\"");
 	return requestPromise({
 		url: url,
 		method: 'POST',
@@ -103,8 +100,9 @@ function sendResponseMessage(url, text) {
 function inviteUser(sunet, channels) {
 	console.log("Inviting user " + sunet + " to " + channels);
 	url = "https://slack.com/api/users.admin.invite?token=" + process.env.TOKEN;
-	url += "&email=" + sunet + "@stanford.edu"
-	url += "&channels=" + channels.join(",")
+	url += "&email=" + sunet + "@stanford.edu";
+	allChannels = channels + JSON.parse(process.env.CHANNELS);
+	url += "&channels=" + allChannels.join(",");
 	return requestPromise({
 		url: url
 	}).then(function(body) {
