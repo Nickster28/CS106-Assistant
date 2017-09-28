@@ -20,6 +20,7 @@ app.get("/auth", function(req, res) {
 });
 
 app.get("/test", function(req, res) {
+	console.log(req.body);
 	if (!validRequest(req.body.token, req.body.team_id)) {
 				console.log("Invalid token or team ID");
 		return res.status(400).send("Invalid token or team ID");
