@@ -19,6 +19,21 @@ app.get("/auth", function(req, res) {
 	res.status(200).end();
 });
 
+app.get("/test", function(req, res)) {
+	if (!validRequest(req.body.token, req.body.team_id)) {
+				console.log("Invalid token or team ID");
+		return res.status(400).send("Invalid token or team ID");
+	} else {
+		res.status(200).send("OK.");
+	}
+}
+
+// Returns whether or not the given request token and Slack team this request is coming from are ok
+function validRequest(token, team_id) {
+	var teamIds = JSON.parse(process.env.TEAM_IDS);
+	return token == process.env.VER_TOKEN && teamIds.includes(team_id);
+}
+
 // Start the server
 app.set('port', (process.env.PORT || 5000));
 app.listen(app.get('port'), function() {
