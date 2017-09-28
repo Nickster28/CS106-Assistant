@@ -210,7 +210,7 @@ var home = function(req, res) {
 			requestPromise({
 				url: url
 			}).then(function(body) {
-				res.status(200).send(data.replace("TOKEN_PLACEHOLDER", body));
+				res.status(200).send(data.replace("TOKEN_PLACEHOLDER", JSON.parse(body)));
 			}, function(error) {
 				res.status(500).send(error);
 			});
