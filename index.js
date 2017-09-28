@@ -19,14 +19,14 @@ app.get("/auth", function(req, res) {
 	res.status(200).end();
 });
 
-app.get("/test", function(req, res)) {
+app.get("/test", function(req, res) {
 	if (!validRequest(req.body.token, req.body.team_id)) {
 				console.log("Invalid token or team ID");
 		return res.status(400).send("Invalid token or team ID");
 	} else {
 		res.status(200).send("OK.");
 	}
-}
+});
 
 // Returns whether or not the given request token and Slack team this request is coming from are ok
 function validRequest(token, team_id) {
