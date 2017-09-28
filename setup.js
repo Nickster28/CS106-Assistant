@@ -199,7 +199,7 @@ var login = function(req, res) {
 }
 
 var home = function(req, res) {
-	console.log(req.params.code);
+	console.log(req.query.code);
 	fs.readFile('./index.html', 'utf8', function(err, data) {
 		if (err) {
 		  res.status(500).send(err);
