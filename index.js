@@ -14,11 +14,6 @@ app.use(bodyParser.urlencoded({
 autograder.initialize(app);
 setup.initialize(app);
 
-app.get("/auth", function(req, res) {
-	console.log(req);
-	res.status(200).end();
-});
-
 app.post("/test", function(req, res) {
 	console.log(req.body);
 	if (!validRequest(req.body.token, req.body.team_id)) {

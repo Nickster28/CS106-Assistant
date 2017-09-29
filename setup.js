@@ -1,76 +1,38 @@
 var request = require('request');
 var fs = require('fs');
 
-/* ENDPOINT: /setup
- * -------------------
- * Creates standard channels for a single CS106 class, and invites specified
- * SLs to those (and other default) channels.  The specific action is determined
- * by the text entered by the user.  The format should be:
- *
- *		[A/B/X/J] [# HWs] [SUNET1, SUNET2, ...]
- * 
- * E.g. the user would type
- *
- *		/setup A 7 sunet1 sunet2 sunet3
- * 
- * This command will create default channels for the specified class [A/B/X/J]
- * including (where ? = [A/B/X/J]:
- *		- cs106?_announcements
- *		- cs106?_general
- *		- cs106?_section
- *		- cs106?_assignmentX for X in [1...#HWs]
- *
- * Then, it invites all provided SUNETs to Slack, and auto-addes them to these
- * created channels.
- * -------------------
- */
-setup = function(req, res) {
-	if (!validRequest(req.body.token, req.body.team_id)) {
-		console.log("Invalid token or team ID");
-		return res.status(400).send("Invalid token or team ID");
-	} else {	
-		console.log("Received setup request.");	
-		res.status(200).send("Working on it...");
-		var responseURL = req.body.response_url;
-
+submit = function(req, res) {
+	if (!validRequest(req.body.team_id)) {
+		console.log("Invalid team ID");
+		return res.status(400).send("Invalid team ID");
+	} else {
 		// Make a new empty promise
 		var promise = new Promise(function(resolve, reject) {
 			resolve();
 		});
 
-		// Text should be [A/B/X/J] [# HWs] [SUNET1, SUNET2, ...]
-		// e.g. "A 7 sunet1 sunet2 sunet3"
-		var textElems = req.body.text.split(" ");
-		var className = ("106" + textElems.shift()).toLowerCase();
-		var numHWs = parseInt(textElems.shift());
+		var className = ("106" + req.body.classLetter).toLowerCase();
+		var numHWs = parseInt(req.body.numHWs);
 
 		// Keep track of the IDs of the created channels for inviting later
 		var channelIds = [];
 		getChannelNames(className, numHWs).forEach(function(channel) {
 			promise = promise.then(function() {
-				return createChannel(channel).then(function(channelId) {
+				return createChannel(channel, req.body.token).then(function(channelId) {
 					channelIds.push(channelId);
 				});
 			});
 		});
 
-		// Send a message that we created channels
-		promise = promise.then(function() {
-			return sendResponseMessage(responseURL, "Created channels.");
-		});
-
 		// Invite each user to these channels
-		textElems.forEach(function(sunet) {
+		req.body.sunets.split(' ').forEach(function(sunet) {
 			promise = promise.then(function() {
-				return inviteUser(sunet, channelIds);
+				return inviteUser(sunet, channelIds, req.body.token);
 			});
 		});
 
-		// Send final messages
 		return promise.then(function() {
-			return sendResponseMessage(responseURL, "Invited users.");
-		}).then(function() {
-			return sendResponseMessage(responseURL, "Done!");
+			res.status(200).send("Done.");
 		}, function(error) {
 			console.log("Error: " + error);
 			res.status(500).send(error);
@@ -78,28 +40,8 @@ setup = function(req, res) {
 	}
 }
 
-/* FUNCTION: sendResponseMessage
---------------------------------
-Parameters:
-	- url: the callback URL to post the Slack message to
-	- text: the text of the message to post
-
-Returns: a promise that sends the given message back to Slack to the user.
---------------------------------
-*/
-function sendResponseMessage(url, text) {
-	return requestPromise({
-		url: url,
-		method: 'POST',
-		json: true,
-		body: {
-			'text': text
-		}
-	});
-}
-
-function inviteUser(sunet, channels) {
-	url = "https://slack.com/api/users.admin.invite?token=" + process.env.TOKEN;
+function inviteUser(sunet, channels, token) {
+	url = "https://slack.com/api/users.admin.invite?token=" + token;
 	url += "&email=" + sunet + "@stanford.edu";
 	allChannels = channels.concat(JSON.parse(process.env.CHANNELS));
 	console.log("Inviting user " + sunet + " to " + allChannels);
@@ -147,9 +89,9 @@ Returns: a promise that sends a request to Slack to create a new channel with
 the given name.  The promise also returns the Channel ID of the new channel.
 ---------------------------
 */
-function createChannel(name) {
+function createChannel(name, token) {
 	return requestPromise({
-		url: "https://slack.com/api/channels.create?token=" + process.env.TOKEN + "&name=" + name
+		url: "https://slack.com/api/channels.create?token=" + token + "&name=" + name
 	}).then(function(body) {
 		return JSON.parse(body).channel.id;
 	});
@@ -183,10 +125,10 @@ function requestPromise(params) {
 	});
 }
 
-// Returns whether the request token and Slack team are ok
-function validRequest(token, team_id) {
+// Returns whether the Slack team is ok
+function validRequest(team_id) {
 	var teamIds = JSON.parse(process.env.TEAM_IDS);
-	return token == process.env.VER_TOKEN && teamIds.includes(team_id);
+	return teamIds.includes(team_id);
 }
 
 var login = function(req, res) {
@@ -210,7 +152,9 @@ var home = function(req, res) {
 			requestPromise({
 				url: url
 			}).then(function(body) {
-				res.status(200).send(data.replace("TOKEN_PLACEHOLDER", JSON.parse(body).access_token));
+				data = data.replace("TOKEN_PLACEHOLDER", JSON.parse(body).access_token)
+				data = data.replace("TEAM_ID_PLACEHOLDER", JSON.parse(body).team_id);
+				res.status(200).send(data);
 			}, function(error) {
 				res.status(500).send(error);
 			});
@@ -221,8 +165,8 @@ var home = function(req, res) {
 module.exports = {
 	initialize: function(app) {
 		console.log("Initializing setup...");
-		app.post('/setup', setup);
 		app.get('/', login);
 		app.get('/home', home);
+		app.post('/submit', submit);
 	}
 }
