@@ -136,7 +136,7 @@ var login = function(req, res) {
 		if (err) {
 			res.status(500).send(err);
 		} else {
-			res.status(200).send(data);
+			res.status(200).send(data.replace("CLIENT_ID_PLACEHOLDER", process.env.CLIENT_ID));
 		}
 	});
 }
